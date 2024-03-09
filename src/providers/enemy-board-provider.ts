@@ -1,7 +1,12 @@
 import EventEmitter from "../helpers/event-emitter";
-import { BOARD_SIZE, BOARD_VALUES, BoardEventTypes } from "../constants";
-import { AnswerType } from "../constants";
-import { Board } from "../types";
+import {
+  BOARD_SIZE,
+  BOARD_VALUES,
+  BoardEventTypes,
+  HIT_SHIP_COUNT_FOR_WIN,
+} from "../constants";
+import { AnswerMessageModel, Board } from "../types";
+import { gameProvider } from "./game-provider";
 
 class EnemyBoardProvider {
   private board: Board = null;
@@ -19,24 +24,38 @@ class EnemyBoardProvider {
     this.render();
   }
 
-  public setAnswer(answerType: string) {
-    switch (answerType) {
-      // TODO: Implement cases
-      case AnswerType.MISS: {
-        break;
-      }
-      case AnswerType.HIT: {
-        break;
-      }
-      case AnswerType.KILL: {
-        break;
-      }
-    }
+  public setAnswer(answer: AnswerMessageModel[]) {
+    if (!this.board) return;
+
+    answer.forEach(({ i, j, boardValue }: AnswerMessageModel) => {
+      this.board![i][j] = boardValue;
+    });
+
     this.render();
   }
 
   private render() {
-    this.eventEmitter.emit(BoardEventTypes.ON_UPDATE, this.board);
+    if (!this.board) return;
+
+    this.eventEmitter.emit(BoardEventTypes.ON_UPDATE, [...this.board]);
+
+    this.checkForWin();
+  }
+
+  private checkForWin() {
+    if (!this.board) return;
+
+    let hitShipCount = 0;
+
+    this.board.forEach((_, i) => {
+      this.board![i].forEach((cell) => {
+        if (cell === BOARD_VALUES.HIT) hitShipCount++;
+      });
+    });
+
+    if (hitShipCount === HIT_SHIP_COUNT_FOR_WIN) {
+      gameProvider.gameEnd(true);
+    }
   }
 }
 

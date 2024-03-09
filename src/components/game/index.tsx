@@ -4,26 +4,41 @@ import { SelfBoard } from "../self-board";
 import { EnemyBoard } from "../enemy-board";
 import { signalingProvider } from "../../providers/signaling-provider";
 import { MessageTypes, MessagesEventTypes } from "../../constants";
-import "./game.scss";
+import "./index.scss";
 
 export const Game = () => {
   const [youReady, setYouReady] = useState(false);
   const [enemyReady, setEnemyReady] = useState(false);
+  const [isYourTurn, setIsYourTurn] = useState(false);
 
   useEffect(() => {
-    gameProvider.init();
-
     const onReadyOff = signalingProvider.eventEmitter.on(
       MessagesEventTypes.ON_READY,
       onEnemyReady
     );
 
-    return onReadyOff;
+    const onConnectOff = signalingProvider.eventEmitter.on(
+      MessagesEventTypes.ON_CONNECT,
+      setIsYourTurn
+    );
+
+    const onSwitchTurn = signalingProvider.eventEmitter.on(
+      MessagesEventTypes.ON_SWITCH_TURN,
+      () => {
+        setIsYourTurn((prev) => !prev);
+      }
+    );
+
+    gameProvider.init();
+
+    return () => {
+      onSwitchTurn();
+      onConnectOff();
+      onReadyOff();
+    };
   }, []);
 
-  const onEnemyReady = () => {
-    setEnemyReady(true);
-  };
+  const onEnemyReady = () => setEnemyReady(true);
 
   const handleYouReady = () => {
     signalingProvider.sendMessage(MessageTypes.READY, null);
@@ -43,14 +58,12 @@ export const Game = () => {
       </div>
 
       <SelfBoard ready={youReady} />
-      {enemyReady ? <EnemyBoard /> : <h2>The enemy is not ready yet.</h2>}
+
+      {enemyReady ? (
+        <EnemyBoard isYourTurn={isYourTurn} />
+      ) : (
+        <h2>The enemy is not ready yet.</h2>
+      )}
     </div>
   );
-
-  const ship = {
-    cordinates: [
-      { i: 1, j: 1 },
-      { i: 1, j: 2 },
-    ],
-  };
 };

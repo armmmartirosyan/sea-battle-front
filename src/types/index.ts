@@ -1,12 +1,12 @@
 export type AskMessageModel = {
-  userId: string;
   i: number;
   j: number;
 };
 
 export type AnswerMessageModel = {
-  userId: string;
-  answerType: string;
+  i: number;
+  j: number;
+  boardValue: number;
 };
 
 export type Listener = {
@@ -21,3 +21,16 @@ export type ListenerInfo = {
 export type Board = number[][] | null;
 
 export type SelfBoardProps = { ready: boolean };
+
+export type EnemyBoardProps = { isYourTurn: boolean };
+
+export type ColumnProps = {
+  onClick: (i: number, j: number) => void;
+  cell: number;
+  i: number;
+  j: number;
+};
+
+export type ShipCoord = { i: number; j: number };
+
+export type ShipCoordsObject = { ships: ShipCoord[]; hitShips: ShipCoord[] };

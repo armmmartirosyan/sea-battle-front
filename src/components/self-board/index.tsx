@@ -6,7 +6,7 @@ import {
   BoardEventTypes,
 } from "../../constants";
 import { Board, SelfBoardProps } from "../../types";
-import "./self-board.scss";
+import { Cell } from "../column";
 
 export const SelfBoard = ({ ready }: SelfBoardProps) => {
   const [board, setBoard] = useState<Board>(null);
@@ -51,13 +51,7 @@ export const SelfBoard = ({ ready }: SelfBoardProps) => {
                 <p className="row_index">{i + 1}</p>
 
                 {row.map((cell, j) => (
-                  <div
-                    key={j}
-                    className="column"
-                    onClick={() => onCellClick(i, j)}
-                  >
-                    {cell}
-                  </div>
+                  <Cell key={j} cell={cell} i={i} j={j} onClick={onCellClick} />
                 ))}
               </div>
             ))}

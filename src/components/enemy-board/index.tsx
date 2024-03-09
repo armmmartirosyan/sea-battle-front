@@ -1,12 +1,16 @@
-import React, { useEffect } from "react";
-import { BOARD_INDEX_LETTERS, BoardEventTypes } from "../../constants";
+import React, { useEffect, useState } from "react";
+import {
+  BOARD_INDEX_LETTERS,
+  BOARD_VALUES,
+  BoardEventTypes,
+} from "../../constants";
 import { enemyBoardProvider } from "../../providers/enemy-board-provider";
 import { gameProvider } from "../../providers/game-provider";
-import { Board } from "../../types";
-import "./enemy-board.scss";
+import { Board, EnemyBoardProps } from "../../types";
+import { Cell } from "../column";
 
-export const EnemyBoard = () => {
-  const [board, setBoard] = React.useState<Board>(null);
+export const EnemyBoard = ({ isYourTurn }: EnemyBoardProps) => {
+  const [board, setBoard] = useState<Board>(null);
 
   useEffect(() => {
     const onUpdateEnemyOff = enemyBoardProvider.eventEmitter.on(
@@ -19,7 +23,11 @@ export const EnemyBoard = () => {
     return onUpdateEnemyOff;
   }, []);
 
-  const onClick = (i: number, j: number) => {
+  const onHit = (i: number, j: number) => {
+    if (!isYourTurn || (board && board[i][j] !== BOARD_VALUES.EMPTY)) {
+      return;
+    }
+
     gameProvider.ask(i, j);
   };
 
@@ -42,11 +50,7 @@ export const EnemyBoard = () => {
                 <p className="row_index">{i + 1}</p>
 
                 {row.map((cell, j) => (
-                  <div
-                    key={j}
-                    onClick={() => onClick(i, j)}
-                    className="column"
-                  />
+                  <Cell key={j} cell={cell} i={i} j={j} onClick={onHit} />
                 ))}
               </div>
             ))}
